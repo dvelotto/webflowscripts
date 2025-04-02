@@ -1,72 +1,82 @@
-function u(e){
-  let o = "dc-accordion-is-open",
-      s = e.getAttribute("dc-accordion-toggle");
+function u(e) {
+  let openClass = "dc-accordion-is-open",
+      toggleClass = e.getAttribute("dc-accordion-toggle");
 
-  if (!s) {
+  if (!toggleClass) {
     console.error("[DC] Accordion Error: Toggle class name attribute ('dc-accordion-toggle') is missing.");
     return;
   }
 
-  let c = e.querySelectorAll(`.${s}`);
-  if (c.length === 0) {
-    console.error(`[DC] Accordion Error: No elements found with the class '${s}' in the accordion list.`);
+  let toggles = e.querySelectorAll(`.${toggleClass}`);
+  if (toggles.length === 0) {
+    console.error(`[DC] Accordion Error: No elements found with the class '${toggleClass}' in the accordion list.`);
     return;
   }
 
-  let n = parseInt(e.getAttribute("dc-accordion-default")) || 1,
-      l = e.getAttribute("dc-accordion-open-all") === "true",
-      a = e.getAttribute("dc-accordion-close") !== "false";
+  let defaultIndex = parseInt(e.getAttribute("dc-accordion-default")) || 1,
+      openAll = e.getAttribute("dc-accordion-open-all") === "true",
+      allowClose = e.getAttribute("dc-accordion-close") !== "false";
 
-  if (l && e.getAttribute("dc-accordion-close") === null) a = false;
+  if (openAll && e.getAttribute("dc-accordion-close") === null) {
+    allowClose = false;
+  }
 
-  if (!l && (n < 1 || n > c.length)) {
-    console.error(`[DC] Accordion Error: The default open index (${n}) is out of range for the number of toggles (${c.length}).`);
+  if (!openAll && (defaultIndex < 1 || defaultIndex > toggles.length)) {
+    console.error(`[DC] Accordion Error: The default open index (${defaultIndex}) is out of range for the number of toggles (${toggles.length}).`);
     return;
   }
 
-  c.forEach((r, t) => {
-    if (l || t === n - 1) {
-      r.click();
-      r.classList.add(o);
+  // Initialize: open all or default toggle
+  toggles.forEach((toggle, index) => {
+    if (openAll || index === defaultIndex - 1) {
+      toggle.click();
+      toggle.classList.add(openClass);
     }
   });
 
-  e.addEventListener("click", function(r) {
-    let t = r.target.closest(`.${s}`);
-    if (!t) return;
+  e.addEventListener("click", function (event) {
+    let targetToggle = event.target.closest(`.${toggleClass}`);
+    if (!targetToggle) return;
 
-    let openCount = Array.from(c).filter(i => i.classList.contains(o)).length;
+    // Count how many toggles are currently open
+    let openCount = Array.from(toggles).filter(i => i.classList.contains(openClass)).length;
 
-    // If closing the last open item, block it
-    if (t.classList.contains(o) && openCount === 1) {
-      return; // prevent closing the last open toggle
-    }
-
-    if (a) {
-      c.forEach(i => {
-        if (i !== t && i.classList.contains(o)) {
-          i.click();
-          i.classList.remove(o);
-        }
-      });
-    }
-
-    // Toggle clicked item
-    if (t.classList.contains(o)) {
-      t.classList.remove(o);
+    // If the target is already open…
+    if (targetToggle.classList.contains(openClass)) {
+      // …and it's the only one open, do nothing.
+      if (openCount === 1) {
+        return;
+      } else {
+        // Otherwise, allow closing it
+        targetToggle.classList.remove(openClass);
+        targetToggle.click();
+      }
     } else {
-      t.classList.add(o);
+      // When opening a new toggle, close others if allowed
+      if (allowClose) {
+        toggles.forEach(item => {
+          if (item !== targetToggle && item.classList.contains(openClass)) {
+            item.classList.remove(openClass);
+            item.click();
+          }
+        });
+      }
+      targetToggle.classList.add(openClass);
+      targetToggle.click();
     }
   });
 }
 
-function d(){
+function d() {
   document.querySelectorAll('[dc-accordion="list"]').forEach(u);
 }
 
-window.Webflow ||= [];
-window.Webflow.push(() => {
-  document.readyState === "loading"
-    ? document.addEventListener("DOMContentLoaded", d)
-    : d();
+// Use older syntax for browser compatibility
+window.Webflow = window.Webflow || [];
+window.Webflow.push(function () {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", d);
+  } else {
+    d();
+  }
 });
