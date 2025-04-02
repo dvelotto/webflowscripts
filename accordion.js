@@ -1,65 +1,16 @@
-function u(e) {
-  var openClass = "dc-accordion-is-open",
-      toggleClass = e.getAttribute("dc-accordion-toggle");
+can you make this script also always keep one open:
 
-  if (!toggleClass) {
-    console.error("[DC] Accordion Error: Toggle class name attribute ('dc-accordion-toggle') is missing.");
-    return;
-  }
-
-  var toggles = e.querySelectorAll('.' + toggleClass);
-  if (toggles.length === 0) {
-    console.error("[DC] Accordion Error: No elements found with the class '" + toggleClass + "' in the accordion list.");
-    return;
-  }
-
-  var defaultIndex = parseInt(e.getAttribute("dc-accordion-default")) || 1;
-  if (defaultIndex < 1 || defaultIndex > toggles.length) {
-    console.error("[DC] Accordion Error: The default open index (" + defaultIndex + ") is out of range for the number of toggles (" + toggles.length + ").");
-    return;
-  }
-
-  // Initialize: Open only the default toggle.
-  toggles.forEach(function(toggle, index) {
-    if (index === defaultIndex - 1) {
-      toggle.click();
-      toggle.classList.add(openClass);
-    }
-  });
-
-  // Listen for clicks on the accordion.
-  e.addEventListener("click", function(event) {
-    var clickedToggle = event.target.closest('.' + toggleClass);
-    if (!clickedToggle) return;
-
-    // If the clicked toggle is already open, do nothing.
-    if (clickedToggle.classList.contains(openClass)) {
-      return;
-    }
-
-    // Close any currently open toggle.
-    toggles.forEach(function(toggle) {
-      if (toggle.classList.contains(openClass)) {
-        toggle.classList.remove(openClass);
-        toggle.click(); // Trigger the close behavior.
-      }
-    });
-
-    // Open the clicked toggle.
-    clickedToggle.classList.add(openClass);
-    clickedToggle.click(); // Trigger the open behavior.
-  });
-}
-
-function d() {
-  document.querySelectorAll('[dc-accordion="list"]').forEach(u);
-}
-
-window.Webflow = window.Webflow || [];
-window.Webflow.push(function () {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", d);
-  } else {
-    d();
-  }
-});
+function u(e){let o="dc-accordion-is-open",s=e.getAttribute("dc-accordion-toggle");if(!s){console.error("[DC] Accordion Error: Toggle class name attribute ('dc-accordion-toggle') is missing.");return}let c=e.querySelectorAll(`.${s}`);if(c.length===0){console.error(`[DC] Accordion Error: No elements found with the class '${s}' in the accordion list.`);return}let n=parseInt(e.getAttribute("dc-accordion-default"))||1,l=e.getAttribute("dc-accordion-open-all")==="true",a=e.getAttribute("dc-accordion-close")!=="false";if(l&&e.getAttribute("dc-accordion-close")===null&&(a=!1),!l&&(n<1||n>c.length)){console.error(`[DC] Accordion Error: The default open index (${n}) is out of range for the number of toggles (${c.length}).`);return}c.forEach((r,t)=>{(l||t===n-1)&&(r.click(),r.classList.add(o))}),e.addEventListener("click",function(r){let t=r.target.closest(`.${s}`);t&&(a&&c.forEach(i=>{i!==t&&i.classList.contains(o)&&(i.click(),i.classList.remove(o))}),t.classList.contains(o)?t.classList.remove(o):t.classList.add(o))})}function d(){document.querySelectorAll('[dc-accordion="list"]').forEach(u)}window.Webflow||=[];window.Webflow.push(()=>{document.readyState==="loading"?document.addEventListener("DOMContentLoaded",d):d()});
+/*!
+ * Webflow Accordion Toggle Script
+ * This script enhances Webflow custom accordion components with additional functionality.
+ * It enables interactive open/close behavior of accordion elements.
+ * Features:
+ * - Open all toggles by default.
+ * - Open a specific toggle by default.
+ * - Comprehensive error handling for configuration issues.
+ *
+ * Copyright 2023, Delta Clan. All rights reserved.
+ * @website: https://deltaclan.com
+ * @author: Dimitris Theofanous, dimitris@deltaclan.com
+ */
