@@ -1,16 +1,77 @@
-can you make this script also always keep one open:
+function u(e) {
+  let openClass = "dc-accordion-is-open",
+      toggleClass = e.getAttribute("dc-accordion-toggle");
 
-function u(e){let o="dc-accordion-is-open",s=e.getAttribute("dc-accordion-toggle");if(!s){console.error("[DC] Accordion Error: Toggle class name attribute ('dc-accordion-toggle') is missing.");return}let c=e.querySelectorAll(`.${s}`);if(c.length===0){console.error(`[DC] Accordion Error: No elements found with the class '${s}' in the accordion list.`);return}let n=parseInt(e.getAttribute("dc-accordion-default"))||1,l=e.getAttribute("dc-accordion-open-all")==="true",a=e.getAttribute("dc-accordion-close")!=="false";if(l&&e.getAttribute("dc-accordion-close")===null&&(a=!1),!l&&(n<1||n>c.length)){console.error(`[DC] Accordion Error: The default open index (${n}) is out of range for the number of toggles (${c.length}).`);return}c.forEach((r,t)=>{(l||t===n-1)&&(r.click(),r.classList.add(o))}),e.addEventListener("click",function(r){let t=r.target.closest(`.${s}`);t&&(a&&c.forEach(i=>{i!==t&&i.classList.contains(o)&&(i.click(),i.classList.remove(o))}),t.classList.contains(o)?t.classList.remove(o):t.classList.add(o))})}function d(){document.querySelectorAll('[dc-accordion="list"]').forEach(u)}window.Webflow||=[];window.Webflow.push(()=>{document.readyState==="loading"?document.addEventListener("DOMContentLoaded",d):d()});
-/*!
- * Webflow Accordion Toggle Script
- * This script enhances Webflow custom accordion components with additional functionality.
- * It enables interactive open/close behavior of accordion elements.
- * Features:
- * - Open all toggles by default.
- * - Open a specific toggle by default.
- * - Comprehensive error handling for configuration issues.
- *
- * Copyright 2023, Delta Clan. All rights reserved.
- * @website: https://deltaclan.com
- * @author: Dimitris Theofanous, dimitris@deltaclan.com
- */
+  if (!toggleClass) {
+    console.error("[DC] Accordion Error: Toggle class name attribute ('dc-accordion-toggle') is missing.");
+    return;
+  }
+
+  let toggles = e.querySelectorAll(`.${toggleClass}`);
+  if (toggles.length === 0) {
+    console.error(`[DC] Accordion Error: No elements found with the class '${toggleClass}' in the accordion list.`);
+    return;
+  }
+
+  let defaultIndex = parseInt(e.getAttribute("dc-accordion-default")) || 1,
+      openAll = e.getAttribute("dc-accordion-open-all") === "true",
+      allowClose = e.getAttribute("dc-accordion-close") !== "false";
+
+  if (openAll && e.getAttribute("dc-accordion-close") === null) {
+    allowClose = false;
+  }
+
+  if (!openAll && (defaultIndex < 1 || defaultIndex > toggles.length)) {
+    console.error(`[DC] Accordion Error: The default open index (${defaultIndex}) is out of range for the number of toggles (${toggles.length}).`);
+    return;
+  }
+
+  // Initialize: open all if openAll is true, otherwise open only the default toggle.
+  toggles.forEach((toggle, index) => {
+    if (openAll || index === defaultIndex - 1) {
+      toggle.click();
+      toggle.classList.add(openClass);
+    }
+  });
+
+  e.addEventListener("click", function(event) {
+    let clickedToggle = event.target.closest(`.${toggleClass}`);
+    if (!clickedToggle) return;
+
+    // Gather currently open toggles
+    let openToggles = Array.from(toggles).filter(i => i.classList.contains(openClass));
+
+    // If the clicked toggle is already open...
+    if (clickedToggle.classList.contains(openClass)) {
+      // ...and it is the only one open, do nothing.
+      if (openToggles.length === 1) {
+        return;
+      } else {
+        // Otherwise, allow closing it.
+        clickedToggle.classList.remove(openClass);
+        clickedToggle.click();
+      }
+    } else {
+      // If the clicked toggle is closed, close all others (if allowed) and open the clicked one.
+      if (allowClose) {
+        toggles.forEach(i => {
+          if (i !== clickedToggle && i.classList.contains(openClass)) {
+            i.classList.remove(openClass);
+            i.click();
+          }
+        });
+      }
+      clickedToggle.classList.add(openClass);
+      clickedToggle.click();
+    }
+  });
+}
+
+function d() {
+  document.querySelectorAll('[dc-accordion="list"]').forEach(u);
+}
+
+window.Webflow = window.Webflow || [];
+window.Webflow.push(() => {
+  document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", d) : d();
+});
